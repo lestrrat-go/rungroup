@@ -89,10 +89,6 @@ func (rc *runCtx) Run(ctx context.Context) <-chan error {
 	done := make(chan struct{})
 	go wait(done, rc.wg)
 
-	select {
-	case <-ctx.Done():
-	case <-done:
-	}
-
+	<-done
 	return errs
 }

@@ -34,3 +34,25 @@ func TestRunGroup(t *testing.T) {
 		return
 	}
 }
+
+func TestWait(t *testing.T) {
+	var cleanupCalled bool
+	var g rungroup.Group
+	g.Add(rungroup.ActorFunc(func(ctx context.Context) error {
+		// This goroutine waits indefinitely until canceled
+		<-ctx.Done()
+		cleanupCalled = true
+		return nil
+	}))
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
+	defer cancel()
+
+	if !assert.NoError(t, <-g.Run(ctx), `g.Run() should succeed`) {
+		return
+	}
+
+	if !assert.True(t, cleanupCalled, `cleanup should have been called`) {
+		return
+	}
+}
